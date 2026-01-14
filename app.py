@@ -117,7 +117,6 @@ if st.button("Generate Report"):
                         unique_games = recent_h2h.groupby('game_id').first().reset_index().sort_values('game_date', ascending=False)
 
                         for idx, h2h_game in unique_games.iterrows():
-                            # Venue Logic
                             is_player_team_row = (h2h_game['team_id'] == p_team_id)
                             match_str = h2h_game['matchup'].upper()
                             is_home = "VS." in match_str if is_player_team_row else "@" in match_str
@@ -136,7 +135,6 @@ if st.button("Generate Report"):
                                 pts, reb, ast = pm['points'], pm['reboundstotal'], pm['assists']
                                 pra = pts + reb + ast
                                 
-                                # Re-calculating shooting numbers
                                 fgm, fga = pm['fieldgoalsmade'], pm['fieldgoalsattempted']
                                 fg3m, fg3a = pm['threepointersmade'], pm['threepointersattempted']
                                 fg2m, fg2a = fgm - fg3m, fga - fg3a
@@ -156,11 +154,18 @@ if st.button("Generate Report"):
 
                         if top_h2h_stats:
                             hp, hr, ha, hpra = top_h2h_stats
+                            # First Row: Core Stats
                             c1, c2, c3, c4 = st.columns(4)
                             c1.metric("Points (L5)", f"{l5_pts:.1f}", f"{l5_pts-hp:.1f} vs H2H")
                             c2.metric("Rebounds (L5)", f"{l5_reb:.1f}", f"{l5_reb-hr:.1f} vs H2H")
                             c3.metric("Assists (L5)", f"{l5_ast:.1f}", f"{l5_ast-ha:.1f} vs H2H")
                             c4.metric("PRA (L5)", f"{l5_pts+l5_reb+l5_ast:.1f}", f"{(l5_pts+l5_reb+l5_ast)-hpra:.1f} vs H2H")
+
+                            # Second Row: Combinations (P+R, P+A, R+A)
+                            c5, c6, c7, _ = st.columns(4)
+                            c5.metric("P+R (L5)", f"{l5_pts+l5_reb:.1f}", f"{(l5_pts+l5_reb)-(hp+hr):.1f} vs H2H")
+                            c6.metric("P+A (L5)", f"{l5_pts+l5_ast:.1f}", f"{(l5_pts+l5_ast)-(hp+ha):.1f} vs H2H")
+                            c7.metric("R+A (L5)", f"{l5_reb+l5_ast:.1f}", f"{(l5_reb+l5_ast)-(hr+ha):.1f} vs H2H")
 
                         st.divider()
                         time.sleep(0.15)
